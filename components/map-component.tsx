@@ -141,13 +141,13 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
     // Add new markers
     filteredAreas.forEach((area) => {
       const el = document.createElement('div')
-      el.className = `cursor-pointer transition-transform hover:scale-105`
+      el.className = `cursor-pointer`
 
       // Create marker element with icon - optimized for performance
       const markerElement = document.createElement('div')
       markerElement.className = `flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg ${
         getMarkerColor(area.type)
-      } transition-all duration-200`
+      }`
 
       // Use innerHTML for better performance than creating nested elements
       markerElement.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${getIconPath(area.type)}</svg>`
