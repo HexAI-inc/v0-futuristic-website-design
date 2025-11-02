@@ -24,7 +24,7 @@ export function ICCADrawer({ open, onOpenChange, selectedICCA }: ICCADrawerProps
   // Check if we're on mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640) // sm breakpoint
+      setIsMobile(window.innerWidth < 1024) // lg breakpoint - consistent with map component
     }
     
     checkMobile()
@@ -69,82 +69,9 @@ export function ICCADrawer({ open, onOpenChange, selectedICCA }: ICCADrawerProps
   return (
     <>
       {isMobile ? (
-        // Full screen sheet on mobile
-        <Sheet open={open} onOpenChange={handleDrawerChange}>
-          <SheetContent side="bottom" className="h-[90vh] max-h-[90vh] flex flex-col">
-            <SheetHeader>
-              <Badge className="w-fit mb-2 bg-primary">
-                Honorary ICCA
-              </Badge>
-              <SheetTitle className="text-2xl">{selectedICCA.name}</SheetTitle>
-              <SheetDescription className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                {selectedICCA.region}
-              </SheetDescription>
-            </SheetHeader>
-
-            <div className="px-4 pb-4 space-y-6 flex-1 overflow-y-auto">
-              {/* Summary */}
-              <p className="text-base leading-relaxed">{selectedICCA.summary}</p>
-
-              {/* Highlights */}
-              <div>
-                <h4 className="font-semibold mb-3">Key Highlights</h4>
-                <ul className="space-y-2">
-                  {selectedICCA.highlights.map((highlight, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Image Carousel */}
-              <div>
-                <h4 className="font-semibold mb-3">Gallery</h4>
-                <div className="relative">
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <Image
-                      src={selectedICCA.gallery[currentImageIndex].src}
-                      alt={selectedICCA.gallery[currentImageIndex].alt}
-                      fill
-                      className="object-cover cursor-pointer"
-                      onClick={() => openModal(selectedICCA.gallery[currentImageIndex].src)}
-                    />
-                  </div>
-
-                  {/* Dots */}
-                  {selectedICCA.gallery.length > 1 && (
-                    <div className="flex justify-center gap-1 mt-2">
-                      {selectedICCA.gallery.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-all ${
-                            index === currentImageIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 border-t">
-              <SheetClose asChild>
-                <Button variant="outline" className="w-full">
-                  Close
-                </Button>
-              </SheetClose>
-            </div>
-          </SheetContent>
-        </Sheet>
-      ) : (
-        // Side drawer on desktop
-        <Drawer open={open} onOpenChange={handleDrawerChange} direction="right">
-          <DrawerContent className="w-full sm:w-[900px] data-[state=open]:duration-700 data-[state=closed]:duration-700 h-full !inset-0 sm:!inset-y-0 sm:!right-0 sm:!left-auto sm:!border-l flex flex-col">
+        // Bottom drawer on mobile
+        <Drawer open={open} onOpenChange={handleDrawerChange}>
+          <DrawerContent className="h-[90vh] max-h-[90vh] flex flex-col">
             <DrawerHeader>
               <Badge className="w-fit mb-2 bg-primary">
                 Honorary ICCA
@@ -214,6 +141,79 @@ export function ICCADrawer({ open, onOpenChange, selectedICCA }: ICCADrawerProps
             </div>
           </DrawerContent>
         </Drawer>
+      ) : (
+        // Side sheet on desktop  
+        <Sheet open={open} onOpenChange={handleDrawerChange}>
+          <SheetContent side="right" className="w-full sm:w-[900px] flex flex-col">
+            <SheetHeader>
+              <Badge className="w-fit mb-2 bg-primary">
+                Honorary ICCA
+              </Badge>
+              <SheetTitle className="text-2xl">{selectedICCA.name}</SheetTitle>
+              <SheetDescription className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {selectedICCA.region}
+              </SheetDescription>
+            </SheetHeader>
+
+            <div className="px-4 pb-4 space-y-6 flex-1 overflow-y-auto">
+              {/* Summary */}
+              <p className="text-base leading-relaxed">{selectedICCA.summary}</p>
+
+              {/* Highlights */}
+              <div>
+                <h4 className="font-semibold mb-3">Key Highlights</h4>
+                <ul className="space-y-2">
+                  {selectedICCA.highlights.map((highlight, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Image Carousel */}
+              <div>
+                <h4 className="font-semibold mb-3">Gallery</h4>
+                <div className="relative">
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    <Image
+                      src={selectedICCA.gallery[currentImageIndex].src}
+                      alt={selectedICCA.gallery[currentImageIndex].alt}
+                      fill
+                      className="object-cover cursor-pointer"
+                      onClick={() => openModal(selectedICCA.gallery[currentImageIndex].src)}
+                    />
+                  </div>
+
+                  {/* Dots */}
+                  {selectedICCA.gallery.length > 1 && (
+                    <div className="flex justify-center gap-1 mt-2">
+                      {selectedICCA.gallery.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-all ${
+                            index === currentImageIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t">
+              <SheetClose asChild>
+                <Button variant="outline" className="w-full">
+                  Close
+                </Button>
+              </SheetClose>
+            </div>
+          </SheetContent>
+        </Sheet>
       )}
 
       {/* Image Modal - Above drawer */}

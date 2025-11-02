@@ -391,3 +391,10 @@
   transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform, opacity;
 }
+
+/* Style Radix UI Dialog Overlay with backdrop blur */
+[data-radix-dialog-overlay] {
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
