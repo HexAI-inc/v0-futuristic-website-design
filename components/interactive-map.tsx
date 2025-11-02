@@ -30,7 +30,14 @@ import { useTheme } from "@/lib/theme-context"
 // Dynamically import map component to avoid SSR issues
 const MapComponent = dynamic(() => import('./map-component'), {
   ssr: false,
-  loading: () => <div className="w-full h-full bg-muted/50 rounded-lg flex items-center justify-center">Loading map...</div>
+  loading: () => (
+    <div className="w-full h-full bg-muted/50 rounded-lg flex items-center justify-center">
+      <div className="flex flex-col items-center space-y-2">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="text-sm text-muted-foreground">Loading interactive map...</p>
+      </div>
+    </div>
+  )
 })
 
 interface ProtectedArea {

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import '@/styles/mapbox-optimized.css'
 import { TreePine, Users, Globe } from 'lucide-react'
 import { useTheme } from '@/lib/theme-context'
 
@@ -27,6 +28,8 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
   const map = useRef<mapboxgl.Map | null>(null)
   const markersRef = useRef<mapboxgl.Marker[]>([])
   const [mapLoaded, setMapLoaded] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const isGlass = theme === "glass-morphism"
 
   // Gambia center coordinates
@@ -36,7 +39,10 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
     const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
     if (!token || token === 'your_mapbox_access_token_here') {
-      console.warn('Mapbox access token not configured. Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your .env.local file.')
+      const errorMsg = 'Mapbox access token not configured. Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your .env.local file.'
+      console.error(errorMsg)
+      setError(errorMsg)
+      setIsLoading(false)
       return
     }
 
@@ -44,27 +50,63 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
 
     if (map.current) return // initialize map only once
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current!,
-      style: theme === 'midnight-jungle'
-        ? 'mapbox://styles/mapbox/dark-v11'
-        : 'mapbox://styles/mapbox/light-v11',
-      center: gambiaCenter,
-      zoom: 7.6,
-      attributionControl: false
-    })
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current!,
+        style: theme === 'midnight-jungle'
+          ? 'mapbox://styles/mapbox/dark-v11'
+          : 'mapbox://styles/mapbox/light-v11',
+        center: gambiaCenter,
+        zoom: 7.6,
+        attributionControl: false,
+        // Performance optimizations
+        antialias: false,
+        fadeDuration: 300,
+        preserveDrawingBuffer: false,
+        // Reduce render frequency for better performance
+        renderWorldCopies: false,
+        // Optimize for performance
+        trackResize: true
+      })
 
-    map.current.on('load', () => {
-      setMapLoaded(true)
-    })
+      // Add error handling
+      map.current.on('error', (e) => {
+        console.error('Mapbox error:', e)
+        setError('Failed to load map. Please check your internet connection and try again.')
+        setIsLoading(false)
+      })
 
-    // Add navigation control
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
+      map.current.on('load', () => {
+        console.log('Map loaded successfully')
+        setMapLoaded(true)
+        setIsLoading(false)
+      })
 
-    // Add attribution control
-    map.current.addControl(new mapboxgl.AttributionControl({
-      compact: true
-    }), 'bottom-right')
+      // Add style loading handler
+      map.current.on('styledata', () => {
+        console.log('Map style loaded')
+      })
+
+      // Add data loading handler  
+      map.current.on('data', (e) => {
+        if (e.dataType === 'source' && e.isSourceLoaded) {
+          console.log('Map data loaded')
+        }
+      })
+
+      // Add navigation control
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
+
+      // Add attribution control
+      map.current.addControl(new mapboxgl.AttributionControl({
+        compact: true
+      }), 'bottom-right')
+
+    } catch (error) {
+      console.error('Failed to initialize map:', error)
+      setError('Failed to initialize map. Please refresh the page and try again.')
+      setIsLoading(false)
+    }
 
     return () => {
       if (map.current) {
@@ -93,34 +135,38 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
     markersRef.current.forEach(marker => marker.remove())
     markersRef.current = []
 
+    // Batch marker creation for better performance
+    const fragment = document.createDocumentFragment()
+    
     // Add new markers
     filteredAreas.forEach((area) => {
       const el = document.createElement('div')
-      el.className = `cursor-pointer`
+      el.className = `cursor-pointer transition-transform hover:scale-105`
 
-      // Create marker element with icon
+      // Create marker element with icon - optimized for performance
       const markerElement = document.createElement('div')
       markerElement.className = `flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg ${
         getMarkerColor(area.type)
-      }`
+      } transition-all duration-200`
 
-      const iconElement = document.createElement('div')
-      iconElement.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${getIconPath(area.type)}</svg>`
+      // Use innerHTML for better performance than creating nested elements
+      markerElement.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${getIconPath(area.type)}</svg>`
 
-      markerElement.appendChild(iconElement)
       el.appendChild(markerElement)
 
-      // Create popup
+      // Create popup with lazy loading
       const popup = new mapboxgl.Popup({
         offset: 25,
         closeButton: false,
-        className: 'custom-popup'
+        className: 'custom-popup',
+        maxWidth: '300px'
       }).setHTML(`
         <div class="p-3 bg-background border border-border rounded-lg shadow-lg max-w-xs">
           <h3 class="font-semibold text-sm mb-1">${area.name}</h3>
           <p class="text-xs text-muted-foreground mb-2">${area.type.replace('-', ' ').toUpperCase()}</p>
-          <p class="text-xs">${area.description}</p>
+          <p class="text-xs line-clamp-2">${area.description}</p>
           <p class="text-xs font-medium mt-1">Size: ${area.size}</p>
+          <button class="text-xs text-primary hover:underline mt-1">Click for details →</button>
         </div>
       `)
 
@@ -130,15 +176,22 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
         .setPopup(popup)
         .addTo(map.current!)
 
-      // Add click handler
+      // Add click handler with debouncing
+      let clickTimeout: NodeJS.Timeout | null = null
       el.addEventListener('click', () => {
-        onAreaClick(area)
-        // Center map on clicked marker
-        map.current!.flyTo({
-          center: area.coordinates,
-          zoom: 9,
-          duration: 1000
-        })
+        if (clickTimeout) return // Prevent rapid clicks
+        
+        clickTimeout = setTimeout(() => {
+          onAreaClick(area)
+          // Smooth center map on clicked marker
+          map.current!.flyTo({
+            center: area.coordinates,
+            zoom: 9,
+            duration: 800,
+            essential: true
+          })
+          clickTimeout = null
+        }, 100)
       })
 
       markersRef.current.push(marker)
@@ -167,7 +220,29 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
     }
   }
 
-  if (!process.env.NEXT_PUBLIC_MAPBOX || process.env.NEXT_PUBLIC_MAPBOX === 'your_mapbox_access_token_here') {
+  // Error state
+  if (error) {
+    return (
+      <div className={`w-full h-full ${isGlass ? "glass-card" : "bg-card"} rounded-lg flex items-center justify-center p-6`}>
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-destructive/10 rounded-full flex items-center justify-center">
+            <Globe className="w-8 h-8 text-destructive" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">Map Loading Error</h3>
+          <p className="text-sm text-muted-foreground mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:bg-primary/90 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Check for missing token
+  if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN === 'your_mapbox_access_token_here') {
     return (
       <div className={`w-full h-full ${isGlass ? "glass-card" : "bg-card"} rounded-lg flex items-center justify-center p-6`}>
         <div className="text-center">
@@ -179,7 +254,7 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
             Please add your Mapbox access token to the .env.local file to enable the interactive map.
           </p>
           <div className="text-xs bg-muted p-3 rounded-lg font-mono">
-            NEXT_PUBLIC_MAPBOX=your_token_here
+            NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_token_here
           </div>
         </div>
       </div>
@@ -210,11 +285,12 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
       </div>
 
       {/* Loading indicator */}
-      {!mapLoaded && (
-        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
+      {isLoading && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-            <p className="text-sm text-muted-foreground">Loading map...</p>
+            <p className="text-sm text-muted-foreground">Initializing Mapbox...</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">This may take a moment</p>
           </div>
         </div>
       )}

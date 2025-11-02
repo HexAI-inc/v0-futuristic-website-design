@@ -1,0 +1,100 @@
+/* Mapbox performance optimizations */
+
+/* Reduce visual complexity during loading */
+.mapboxgl-map {
+  font-family: inherit;
+}
+
+/* Optimize popup rendering */
+.mapboxgl-popup {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.mapboxgl-popup-content {
+  padding: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Optimize marker rendering */
+.mapboxgl-marker {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Smooth transitions for better UX */
+.mapboxgl-popup-close-button {
+  display: none;
+}
+
+/* Custom loading styles */
+.custom-popup {
+  max-width: 320px;
+}
+
+.custom-popup .mapboxgl-popup-tip {
+  border-top-color: hsl(var(--background));
+  border-bottom-color: hsl(var(--background));
+}
+
+/* Improve text rendering */
+.mapboxgl-popup-content {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Performance: Reduce repaints */
+.mapboxgl-canvas {
+  outline: none;
+}
+
+.mapboxgl-canvas-container {
+  position: relative;
+}
+
+/* Loading state improvements */
+.map-loading-overlay {
+  background: linear-gradient(45deg, 
+    transparent 25%, 
+    rgba(0, 0, 0, 0.05) 25%, 
+    rgba(0, 0, 0, 0.05) 50%, 
+    transparent 50%, 
+    transparent 75%, 
+    rgba(0, 0, 0, 0.05) 75%
+  );
+  background-size: 20px 20px;
+  animation: loading-pattern 1s linear infinite;
+}
+
+@keyframes loading-pattern {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 20px;
+  }
+}
+
+/* Responsive optimizations */
+@media (max-width: 768px) {
+  .mapboxgl-popup-content {
+    font-size: 14px;
+  }
+  
+  .mapboxgl-ctrl-group {
+    margin: 10px;
+  }
+}
+
+/* Dark mode optimizations */
+[data-theme="midnight-jungle"] .mapboxgl-popup-content {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+}
+
+[data-theme="midnight-jungle"] .custom-popup .mapboxgl-popup-tip {
+  border-top-color: hsl(var(--background));
+  border-bottom-color: hsl(var(--background));
+}

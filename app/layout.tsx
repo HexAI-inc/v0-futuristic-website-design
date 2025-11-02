@@ -25,6 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect to Mapbox CDN for faster map loading */}
+        <link rel="preconnect" href="https://api.mapbox.com" />
+        <link rel="preconnect" href="https://tiles.mapbox.com" />
+        <link rel="dns-prefetch" href="https://api.mapbox.com" />
+        <link rel="dns-prefetch" href="https://tiles.mapbox.com" />
+      </head>
       <body className={`${geist.className} font-sans antialiased`}>
         <SitePreloader />
         <ThemeProvider>
