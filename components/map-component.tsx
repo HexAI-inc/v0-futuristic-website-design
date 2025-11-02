@@ -167,7 +167,7 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
     }
   }
 
-  if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN === 'your_mapbox_access_token_here') {
+  if (!process.env.NEXT_PUBLIC_MAPBOX || process.env.NEXT_PUBLIC_MAPBOX === 'your_mapbox_access_token_here') {
     return (
       <div className={`w-full h-full ${isGlass ? "glass-card" : "bg-card"} rounded-lg flex items-center justify-center p-6`}>
         <div className="text-center">
@@ -179,7 +179,7 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
             Please add your Mapbox access token to the .env.local file to enable the interactive map.
           </p>
           <div className="text-xs bg-muted p-3 rounded-lg font-mono">
-            NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_token_here
+            NEXT_PUBLIC_MAPBOX=your_token_here
           </div>
         </div>
       </div>
