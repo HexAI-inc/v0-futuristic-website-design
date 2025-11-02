@@ -36,7 +36,7 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
   const gambiaCenter: [number, number] = [-15.5, 13.45]
 
   useEffect(() => {
-    const token = process.env._ACCESS_TOKEN
+    const token = process.env.NEXT_PUBLIC_MAPBOX
 
     if (!token || token === 'your_mapbox_access_token_here') {
       const errorMsg = 'Mapbox access token not configured. Please add NEXT_PUBLIC_MAPBOX to your .env.local file.'
