@@ -36,10 +36,10 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
   const gambiaCenter: [number, number] = [-15.5, 13.45]
 
   useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+    const token = process.env._ACCESS_TOKEN
 
     if (!token || token === 'your_mapbox_access_token_here') {
-      const errorMsg = 'Mapbox access token not configured. Please add NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN to your .env.local file.'
+      const errorMsg = 'Mapbox access token not configured. Please add NEXT_PUBLIC_MAPBOX to your .env.local file.'
       console.error(errorMsg)
       setError(errorMsg)
       setIsLoading(false)
@@ -131,7 +131,7 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
   useEffect(() => {
     if (!map.current || !mapLoaded) return
 
-    // Clear existing markers
+    // Clear existing markers and popups
     markersRef.current.forEach(marker => marker.remove())
     markersRef.current = []
 
@@ -141,45 +141,62 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
     // Add new markers
     filteredAreas.forEach((area) => {
       const el = document.createElement('div')
-      el.className = `cursor-pointer`
+      el.className = `cursor-pointer transition-all duration-200`
 
       // Create marker element with icon - optimized for performance
       const markerElement = document.createElement('div')
       markerElement.className = `flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-lg ${
         getMarkerColor(area.type)
-      }`
+      } transition-all duration-200`
 
       // Use innerHTML for better performance than creating nested elements
       markerElement.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${getIconPath(area.type)}</svg>`
 
       el.appendChild(markerElement)
 
-      // Create popup with lazy loading
-      const popup = new mapboxgl.Popup({
-        offset: 25,
+      // Create hover tooltip popup
+      const hoverPopup = new mapboxgl.Popup({
+        offset: 15,
         closeButton: false,
-        className: 'custom-popup',
-        maxWidth: '300px'
+        className: 'hover-popup',
+        maxWidth: '240px',
+        anchor: 'bottom'
       }).setHTML(`
-        <div class="p-3 bg-background border border-border rounded-lg shadow-lg max-w-xs">
+        <div class="p-2 bg-background/95 backdrop-blur-sm border border-border rounded-lg shadow-lg">
           <h3 class="font-semibold text-sm mb-1">${area.name}</h3>
-          <p class="text-xs text-muted-foreground mb-2">${area.type.replace('-', ' ').toUpperCase()}</p>
-          <p class="text-xs line-clamp-2">${area.description}</p>
-          <p class="text-xs font-medium mt-1">Size: ${area.size}</p>
-          <button class="text-xs text-primary hover:underline mt-1">Click for details →</button>
+          <p class="text-xs text-muted-foreground mb-1">${area.type.replace('-', ' ').toUpperCase()}</p>
+          <p class="text-xs text-muted-foreground">Click for details</p>
         </div>
       `)
 
-      // Create marker
+      // Create marker without auto-popup
       const marker = new mapboxgl.Marker(el)
         .setLngLat(area.coordinates)
-        .setPopup(popup)
         .addTo(map.current!)
 
-      // Add click handler with debouncing
+      // Add hover events for tooltip and visual feedback
+      el.addEventListener('mouseenter', () => {
+        hoverPopup.setLngLat(area.coordinates).addTo(map.current!)
+        // Add subtle visual feedback without movement
+        markerElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'
+        markerElement.style.borderWidth = '3px'
+      })
+
+      el.addEventListener('mouseleave', () => {
+        hoverPopup.remove()
+        // Reset visual state
+        markerElement.style.boxShadow = ''
+        markerElement.style.borderWidth = '2px'
+      })
+
+      // Add click handler for sheet/drawer
       let clickTimeout: NodeJS.Timeout | null = null
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation() // Prevent map click
         if (clickTimeout) return // Prevent rapid clicks
+        
+        // Remove hover tooltip on click
+        hoverPopup.remove()
         
         clickTimeout = setTimeout(() => {
           onAreaClick(area)
@@ -242,7 +259,7 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
   }
 
   // Check for missing token
-  if (!process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN === 'your_mapbox_access_token_here') {
+  if (!process.env.NEXT_PUBLIC_MAPBOX || process.env.NEXT_PUBLIC_MAPBOX === 'your_mapbox_access_token_here') {
     return (
       <div className={`w-full h-full ${isGlass ? "glass-card" : "bg-card"} rounded-lg flex items-center justify-center p-6`}>
         <div className="text-center">
@@ -254,7 +271,7 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
             Please add your Mapbox access token to the .env.local file to enable the interactive map.
           </p>
           <div className="text-xs bg-muted p-3 rounded-lg font-mono">
-            NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_token_here
+            NEXT_PUBLIC_MAPBOX=your_token_here
           </div>
         </div>
       </div>
