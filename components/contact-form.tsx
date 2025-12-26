@@ -13,6 +13,7 @@ import { Send, Loader2, CheckCircle, AlertCircle } from "lucide-react"
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
+  phone: z.string().optional(),
   organization: z.string().optional(),
   subject: z.string().min(5, "Subject must be at least 5 characters"),
   message: z.string().min(20, "Message must be at least 20 characters"),
@@ -38,12 +39,16 @@ export function ContactForm() {
     setSubmitStatus(null)
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch("/api/communications", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          type: "contact",
+          metadata: data.organization ? { organization: data.organization } : {},
+        }),
       })
 
       if (response.ok) {
@@ -86,13 +91,24 @@ export function ContactForm() {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="organization">Organization (Optional)</Label>
-        <Input
-          id="organization"
-          {...register("organization")}
-          placeholder="Your organization or institution"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="organization">Organization (Optional)</Label>
+          <Input
+            id="organization"
+            {...register("organization")}
+            placeholder="Your organization or institution"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">Phone Number (Optional)</Label>
+          <Input
+            id="phone"
+            {...register("phone")}
+            placeholder="+220 ..."
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Calendar, Ruler } from "lucide-react"
-import type { Park } from "@/lib/parks-data"
+import type { ParkWithDetails } from "@/lib/database"
 
-export function SlideshowHero({ park }: { park: Park }) {
+export function SlideshowHero({ park }: { park: ParkWithDetails }) {
   const [currentImage, setCurrentImage] = useState(0)
   const images = park.gallery.slice(0, 4) // Use first 4 images
 

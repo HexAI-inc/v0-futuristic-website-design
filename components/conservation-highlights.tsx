@@ -37,7 +37,8 @@ const highlights = [
 
 export function ConservationHighlights() {
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+  const isGlass = false
 
   return (
     <section className={`py-24 px-4 ${isGlass ? "glass-section" : "bg-muted/30"}`}>

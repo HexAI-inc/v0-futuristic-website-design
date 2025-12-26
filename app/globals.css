@@ -284,6 +284,8 @@
 
   html {
     scroll-behavior: smooth;
+    /* Ensure full height */
+    height: 100vh;
   }
 }
 

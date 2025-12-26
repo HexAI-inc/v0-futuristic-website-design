@@ -6,15 +6,24 @@ export function SitePreloader() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Safety timeout: always hide preloader after 3 seconds max
+    const safetyTimeout = setTimeout(() => {
+      setIsLoading(false)
+    }, 3000)
+
     const handleLoad = () => {
       setTimeout(() => setIsLoading(false), 500)
+      clearTimeout(safetyTimeout)
     }
 
     if (document.readyState === "complete") {
       handleLoad()
     } else {
       window.addEventListener("load", handleLoad)
-      return () => window.removeEventListener("load", handleLoad)
+      return () => {
+        window.removeEventListener("load", handleLoad)
+        clearTimeout(safetyTimeout)
+      }
     }
   }, [])
 

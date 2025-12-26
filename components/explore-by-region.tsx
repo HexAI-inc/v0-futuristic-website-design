@@ -11,12 +11,14 @@ interface ProtectedArea {
 
 interface Region {
   name: string
+  image: string
   areas: ProtectedArea[]
 }
 
 const regions: Region[] = [
   {
     name: "Greater Banjul Area",
+    image: "/dense-forest-canopy-abuko-gambia.jpg",
     areas: [
       { name: "Abuko Nature Reserve", type: "park" },
       { name: "Bijilo Forest Park", type: "park" },
@@ -24,6 +26,7 @@ const regions: Region[] = [
   },
   {
     name: "West Coast Region (WCR)",
+    image: "/makasutu-forest-canopy.jpg",
     areas: [
       { name: "Tanji Bird Reserve", type: "park" },
       { name: "Makasutu Culture Forest", type: "icca" },
@@ -32,6 +35,7 @@ const regions: Region[] = [
   },
   {
     name: "Lower River Region (LRR)",
+    image: "/kiang-west-national-park-gambia-savanna-landscape.jpg",
     areas: [
       { name: "Kiang West National Park", type: "park" },
       { name: "Bintang Bolong Community Conservation Area", type: "icca" },
@@ -39,6 +43,7 @@ const regions: Region[] = [
   },
   {
     name: "North Bank Region (NBR)",
+    image: "/baobolong-bird-habitat.jpg",
     areas: [
       { name: "Niumi National Park", type: "park" },
       { name: "Bao Bolong Wetland Reserve", type: "park" },
@@ -49,6 +54,7 @@ const regions: Region[] = [
   },
   {
     name: "Central River Region (CRR)",
+    image: "/gambia-river-islands-forest.jpg",
     areas: [
       { name: "River Gambia National Park (Baboon Islands)", type: "park" },
       { name: "Tumani Tenda Community Conservation Area", type: "icca" },
@@ -56,6 +62,7 @@ const regions: Region[] = [
   },
   {
     name: "Upper River Region (URR)",
+    image: "/african-bushbuck-antelope.jpg",
     areas: [{ name: "Simenti Nature Reserve", type: "park" }],
   },
 ]
@@ -63,7 +70,8 @@ const regions: Region[] = [
 export function ExploreByRegion() {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null)
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+  const isGlass = false
 
   const getTypeColor = (type: ProtectedArea["type"]) => {
     switch (type) {
@@ -90,16 +98,21 @@ export function ExploreByRegion() {
           {regions.map((region) => (
             <div
               key={region.name}
-              className="relative group"
+              className="relative group overflow-hidden rounded-lg h-[300px]"
               onMouseEnter={() => setHoveredRegion(region.name)}
               onMouseLeave={() => setHoveredRegion(null)}
             >
+              {/* Background Image */}
               <div
-                className={`p-6 rounded-lg border-2 border-border hover:border-primary transition-all cursor-pointer h-full ${isGlass ? "glass-card" : "bg-card"}`}
-              >
-                <div className="flex items-start gap-3 mb-4">
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                style={{ backgroundImage: `url(${region.image})` }}
+              />
+              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/70 transition-colors" />
+
+              <div className="relative p-6 h-full flex flex-col justify-end">
+                <div className="flex items-start gap-3 mb-2">
                   <MapPin className="h-6 w-6 text-primary shrink-0 mt-1" />
-                  <h3 className="text-xl font-semibold">{region.name}</h3>
+                  <h3 className="text-xl font-semibold text-white">{region.name}</h3>
                 </div>
 
                 <div
@@ -107,7 +120,7 @@ export function ExploreByRegion() {
                     hoveredRegion === region.name ? "opacity-100 max-h-96" : "opacity-0 max-h-0 overflow-hidden"
                   }`}
                 >
-                  <p className="text-sm text-muted-foreground mb-3">Protected Areas:</p>
+                  <p className="text-sm text-gray-300 mb-3">Protected Areas:</p>
                   {region.areas.map((area, idx) => (
                     <div key={idx} className="flex items-start gap-2">
                       <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${getTypeColor(area.type)}`} />
@@ -117,7 +130,7 @@ export function ExploreByRegion() {
                 </div>
 
                 {hoveredRegion !== region.name && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-300">
                     {region.areas.length} protected area{region.areas.length !== 1 ? "s" : ""}
                   </p>
                 )}

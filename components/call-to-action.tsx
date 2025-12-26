@@ -8,13 +8,24 @@ import { useTheme } from "@/lib/theme-context"
 
 export function CallToAction() {
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+  const isGlass = false
 
   return (
-    <section className={`py-24 px-4 ${isGlass ? "glass-section" : "bg-muted/30"}`}>
-      <div className="max-w-5xl mx-auto">
+    <section className="relative py-24 px-4 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/atlantic-coast-sunset-gambia.jpg"
+          alt="Sunset over the Atlantic coast"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto">
         <Card
-          className={`p-12 border-primary/20 ${isGlass ? "glass-card" : "bg-linear-to-br from-primary/10 via-card to-secondary/10"}`}
+          className={`p-12 border-primary/20 ${isGlass ? "glass-card" : "bg-card/50 backdrop-blur-md"}`}
         >
           <div className="text-center space-y-6">
             <h2 className="text-4xl md:text-5xl font-bold text-balance">

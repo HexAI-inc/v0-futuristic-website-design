@@ -20,101 +20,64 @@ interface FeaturedArea {
   link: string
 }
 
-const featuredAreas: FeaturedArea[] = [
-  {
-    id: "kiang-west",
-    name: "Kiang West National Park",
-    type: "National Park",
-    image: "/kiang-west-national-park-gambia-savanna-landscape.jpg",
-    description:
-      "The country's flagship wilderness with rolling savannas, mangroves, and tidal creeks that shelter antelope, hyena, and 300+ bird species.",
-    size: "29,051 ha",
-    established: "1987",
-    link: "/parks/kiang-west",
-  },
-  {
-    id: "boa-bolong",
-    name: "Boa Bolong Wetland Reserve",
-    type: "Wetland Reserve",
-    image: "/baobolong-bird-habitat.jpg",
-    description:
-      "A labyrinth of mangrove channels along the Gambia River—prime territory for spotting West African manatees, dolphins, and wading birds.",
-    size: "29,650 ha",
-    established: "1993",
-    link: "/parks/boa-bolong",
-  },
-  {
-    id: "tanbi",
-    name: "Tanbi Wetland National Park",
-    type: "Urban Wetland Park",
-    image: "/coastal-mangrove-atlantic-ocean-gambia.jpg",
-    description:
-      "Banjul's green buffer—a UNESCO Ramsar site where mangroves, mudflats, and fisheries sustain coastal communities and migratory birds.",
-    size: "6,034 ha",
-    established: "2001",
-    link: "/parks/tanbi-wetland",
-  },
-  {
-    id: "river-gambia",
-    name: "River Gambia National Park",
-    type: "Island Sanctuary",
-    image: "/gambia-river-islands-forest.jpg",
-    description:
-      "Five lush islands known as the Baboon Islands, home to The Gambia's chimpanzee rehabilitation project and spectacular river safaris.",
-    size: "585 ha",
-    established: "1978",
-    link: "/parks/river-gambia",
-  },
-  {
-    id: "abuko",
-    name: "Abuko Nature Reserve",
-    type: "Nature Reserve",
-    image: "/tropical-gallery-forest-gambia.jpg",
-    description:
-      "A beloved gateway to Gambian biodiversity where visitors walk shaded boardwalks through gallery forest alive with primates and birds.",
-    size: "134 ha",
-    established: "1968",
-    link: "/parks/abuko",
-  },
-]
-
 export function FeaturedAreasCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
-  const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  const [content, setContent] = useState({
+    title: "Featured Protected Areas",
+    subtitle: "Explore our most iconic conservation areas, each offering unique ecosystems and wildlife experiences",
+    areas: [] as FeaturedArea[]
+  })
 
   useEffect(() => {
-    if (!isAutoPlaying) return
+    fetch('/api/admin/home')
+      .then(res => res.json())
+      .then(data => {
+        if (data.featured_areas) setContent(data.featured_areas)
+      })
+      .catch(err => console.error("Error fetching featured areas content:", err))
+  }, [])
+
+  const { theme } = useTheme()
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+  const isGlass = false
+
+  useEffect(() => {
+    if (!isAutoPlaying || content.areas.length === 0) return
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % featuredAreas.length)
+      setCurrentIndex((prev) => (prev + 1) % content.areas.length)
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [isAutoPlaying])
+  }, [isAutoPlaying, content.areas.length])
 
   const goToPrevious = () => {
     setIsAutoPlaying(false)
-    setCurrentIndex((prev) => (prev - 1 + featuredAreas.length) % featuredAreas.length)
+    setCurrentIndex((prev) => (prev - 1 + content.areas.length) % content.areas.length)
   }
 
   const goToNext = () => {
     setIsAutoPlaying(false)
-    setCurrentIndex((prev) => (prev + 1) % featuredAreas.length)
+    setCurrentIndex((prev) => (prev + 1) % content.areas.length)
   }
 
-  const currentArea = featuredAreas[currentIndex]
+  if (content.areas.length === 0) return null
+
+  const currentArea = content.areas[currentIndex]
 
   return (
     <section className="py-24 px-4 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-balance">
-            Featured <span className="text-primary">Protected Areas</span>
+            {content.title.split(' ').map((word, i) => 
+              word.toLowerCase() === 'protected' || word.toLowerCase() === 'areas' ? 
+              <span key={i} className="text-primary">{word} </span> : word + ' '
+            )}
           </h2>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto text-pretty leading-relaxed">
-            Explore our most iconic conservation areas, each offering unique ecosystems and wildlife experiences
+            {content.subtitle}
           </p>
         </div>
 
@@ -173,7 +136,7 @@ export function FeaturedAreasCarousel() {
 
             {/* Dots indicator */}
             <div className="flex gap-2">
-              {featuredAreas.map((_, index) => (
+              {content.areas.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => {

@@ -15,3 +15,19 @@ Provide a high-level overview of the project.
 
 - Tech 1
 - Tech 2
+
+## Project Description
+
+Converting static site to dynamic web app with Supabase CMS
+
+
+
+## Technologies
+
+- Next.js
+- Supabase
+- PostgreSQL
+- Vercel
+- TypeScript
+- Tailwind CSS
+

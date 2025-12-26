@@ -1,31 +1,40 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-
-const storyPanels = [
-  {
-    image: "/dense-forest-canopy-abuko-gambia.jpg",
-    title: "Lush Forests",
-    description: "Home to rare primates and vibrant birdlife.",
-    query: "dense tropical forest canopy with sunlight filtering through trees in Gambia",
-  },
-  {
-    image: "/wide-gambia-river-aerial-view.jpg",
-    title: "Mighty Rivers",
-    description: "The lifeblood of the nation, carving through parks and wetlands.",
-    query: "wide aerial view of the Gambia River flowing through lush green landscape",
-  },
-  {
-    image: "/coastal-mangrove-atlantic-ocean-gambia.jpg",
-    title: "Pristine Coastlines",
-    description: "Where vital mangrove ecosystems meet the Atlantic.",
-    query: "pristine coastal mangrove forest meeting the Atlantic Ocean in Gambia",
-  },
-]
 
 export function VisualStorySection() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [content, setContent] = useState({
+    title: "A Glimpse of The Gambia's Soul",
+    subtitle: "Scroll through the diverse landscapes that make The Gambia a conservation treasure",
+    panels: [
+      {
+        image: "/dense-forest-canopy-abuko-gambia.jpg",
+        title: "Lush Forests",
+        description: "Home to rare primates and vibrant birdlife.",
+      },
+      {
+        image: "/wide-gambia-river-aerial-view.jpg",
+        title: "Mighty Rivers",
+        description: "The lifeblood of the nation, carving through parks and wetlands.",
+      },
+      {
+        image: "/coastal-mangrove-atlantic-ocean-gambia.jpg",
+        title: "Pristine Coastlines",
+        description: "Where vital mangrove ecosystems meet the Atlantic.",
+      },
+    ]
+  })
+
+  useEffect(() => {
+    fetch('/api/admin/home')
+      .then(res => res.json())
+      .then(data => {
+        if (data.visual_story) setContent(data.visual_story)
+      })
+      .catch(err => console.error("Error fetching visual story content:", err))
+  }, [])
 
   useEffect(() => {
     const container = scrollContainerRef.current
@@ -54,16 +63,19 @@ export function VisualStorySection() {
 
     container.addEventListener("scroll", handleScroll)
     return () => container.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [content])
 
   return (
     <section className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 mb-12">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4">
-          A Glimpse of The Gambia's <span className="text-primary">Soul</span>
+          {content.title.split(' ').map((word, i) => 
+            word.toLowerCase() === 'soul' ? 
+            <span key={i} className="text-primary">{word} </span> : word + ' '
+          )}
         </h2>
         <p className="text-xl text-muted-foreground text-center max-w-3xl mx-auto">
-          Scroll through the diverse landscapes that make The Gambia a conservation treasure
+          {content.subtitle}
         </p>
       </div>
 
@@ -72,7 +84,7 @@ export function VisualStorySection() {
         className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {storyPanels.map((panel, index) => (
+        {content.panels.map((panel, index) => (
           <div
             key={index}
             data-panel
@@ -99,16 +111,6 @@ export function VisualStorySection() {
               <p className="text-2xl md:text-3xl text-muted-foreground max-w-2xl text-pretty">{panel.description}</p>
             </div>
           </div>
-        ))}
-      </div>
-
-      <div className="flex justify-center gap-2 mt-8">
-        {storyPanels.map((_, index) => (
-          <div
-            key={index}
-            className="h-2 w-12 rounded-full bg-muted transition-colors"
-            style={{ backgroundColor: index === 0 ? "hsl(var(--primary))" : undefined }}
-          />
         ))}
       </div>
     </section>

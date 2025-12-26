@@ -20,6 +20,7 @@ import {
   Users as UsersIcon,
 } from "lucide-react"
 import { useTheme } from "@/lib/theme-context"
+import type { ParkFeature } from "@/lib/database"
 
 const iconMap: Record<string, any> = {
   trees: Trees,
@@ -51,9 +52,10 @@ interface Feature {
   description: string
 }
 
-export function ParkFeatures({ features }: { features: Feature[] }) {
+export function ParkFeatures({ features }: { features: ParkFeature[] }) {
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+const isGlass = false
 
   return (
     <section className="py-24 px-4">

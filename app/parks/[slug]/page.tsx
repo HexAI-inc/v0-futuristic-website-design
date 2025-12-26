@@ -3,17 +3,12 @@ import { SlideshowHero } from "@/components/slideshow-hero"
 import { ParkFeatures } from "@/components/park-features"
 import { MasonryGallery } from "@/components/masonry-gallery"
 import { ParkInfo } from "@/components/park-info"
-import { nationalParks } from "@/lib/parks-data"
-
-export function generateStaticParams() {
-  return nationalParks.map((park) => ({
-    slug: park.slug,
-  }))
-}
+import { getPark } from "@/lib/database"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const park = nationalParks.find((p) => p.slug === slug)
+  const park = await getPark(slug)
+
   if (!park) return {}
 
   return {
@@ -24,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ParkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const park = nationalParks.find((p) => p.slug === slug)
+  const park = await getPark(slug)
 
   if (!park) {
     notFound()

@@ -1,19 +1,27 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import type { ParkGallery } from "@/lib/database"
 
 interface GalleryImage {
   url: string
   alt: string
 }
 
-export function MasonryGallery({ images }: { images: GalleryImage[] }) {
+export function MasonryGallery({ images }: { images: ParkGallery[] }) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>(new Array(images.length).fill(false))
+
+  // Cleanup overflow on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [])
 
   const openLightbox = (index: number) => {
     setCurrentIndex(index)

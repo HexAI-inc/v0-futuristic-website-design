@@ -30,7 +30,8 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
   const [mapLoaded, setMapLoaded] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+const isGlass = false
 
   // Gambia center coordinates
   const gambiaCenter: [number, number] = [-15.5, 13.45]
@@ -281,25 +282,6 @@ export default function MapComponent({ filteredAreas, selectedArea, theme, onAre
   return (
     <div className={`w-full h-full ${isGlass ? "glass-card" : "bg-card"} rounded-lg overflow-hidden relative`}>
       <div ref={mapContainer} className="w-full h-full" />
-
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm rounded-lg p-3 border border-border shadow-lg">
-        <div className="text-xs font-medium mb-2 text-foreground">Legend</div>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-xs text-foreground">National Parks</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-            <span className="text-xs text-foreground">ICCAs</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-            <span className="text-xs text-foreground">Biosphere Reserves</span>
-          </div>
-        </div>
-      </div>
 
       {/* Loading indicator */}
       {isLoading && (

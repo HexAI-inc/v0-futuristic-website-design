@@ -3,10 +3,19 @@
 import Link from "next/link"
 import { Trees, Mail, MapPin, Phone } from "lucide-react"
 import { useTheme } from "@/lib/theme-context"
+import { useState, useEffect } from "react"
+import { getFooterSettings, FooterSettings } from "@/lib/database"
 
 export function SiteFooter() {
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  const [settings, setSettings] = useState<FooterSettings | null>(null)
+
+  useEffect(() => {
+    getFooterSettings().then(setSettings)
+  }, [])
+
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+  const isGlass = false
 
   const footerLinks = {
     explore: [
@@ -15,14 +24,14 @@ export function SiteFooter() {
       { name: "Biosphere Reserve", href: "/biosphere" },
     ],
     resources: [
-      { name: "Conservation Guide", href: "#" },
-      { name: "Visit Information", href: "#" },
-      { name: "Research & Data", href: "#" },
+      { name: "Conservation Guide", href: "/resources/conservation-guide" },
+      { name: "Visit Information", href: "/resources/visit-information" },
+      { name: "Research & Data", href: "/resources/research-data" },
     ],
     about: [
-      { name: "About Us", href: "#" },
-      { name: "Contact", href: "#" },
-      { name: "Support Conservation", href: "#" },
+      { name: "About Us", href: "/about" },
+      { name: "Contact", href: "/about/contact" },
+      { name: "Support Conservation", href: "/about/support" },
     ],
   }
 
@@ -45,15 +54,15 @@ export function SiteFooter() {
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>Banjul, The Gambia</span>
+                <span>{settings?.org_address || "Banjul, The Gambia"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <span>info@gambiaprotected.gm</span>
+                <span>{settings?.org_email || "info@gambiaprotected.gm"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                <span>+220 123 4567</span>
+                <span>{settings?.org_phone || "+220 123 4567"}</span>
               </div>
             </div>
           </div>
@@ -103,7 +112,9 @@ export function SiteFooter() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>&copy; 2025 Gambia Protected Areas. All rights reserved.</p>
+          <p>
+            {settings?.copyright_text.replace('{year}', new Date().getFullYear().toString()) || `© ${new Date().getFullYear()} Gambia Protected Areas. All rights reserved.`}
+          </p>
           <div className="flex gap-6">
             <Link href="#" className="hover:text-primary transition-colors">
               Privacy Policy

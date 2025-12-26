@@ -1,20 +1,20 @@
 "use client"
 
 import { useTheme } from "@/lib/theme-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ICCADrawer } from "./icca-drawer"
-import { HonoraryICCA, honoraryIccaDetails } from "@/lib/icca-data"
+import { getIccas, getIcca, type Icca, type IccaWithDetails } from "@/lib/database"
 
 const honoraryICCAs = [
   // Row 1 - Coastal Communities
   "Kartong Point Community Forest",
   "Gunjur Beach Conservation Area",
-  "Sanyang Community Woodlands", 
+  "Sanyang Community Woodlands",
   "Tujereng Village Forest Reserve",
   "Batokunku Mangrove Project",
   "Berending Fishing Grounds",
 
-  // Row 2 - River Communities  
+  // Row 2 - River Communities
   "Kuntaur River Conservation",
   "Janjanbureh Island Preserve",
   "Wassu Stone Circle Guardians",
@@ -23,7 +23,7 @@ const honoraryICCAs = [
   "Kaiaf River Protection Zone",
 
   // Row 3 - Inland Communities
-  "Farafenni Woodland Reserve", 
+  "Farafenni Woodland Reserve",
   "Kerewan Village Commons",
   "Essau Community Forest",
   "Barra Point Conservation",
@@ -32,7 +32,7 @@ const honoraryICCAs = [
 
   // Row 4 - Eastern Communities
   "Bansang Community Reserve",
-  "Basse Forest Initiative", 
+  "Basse Forest Initiative",
   "Fatoto River Conservation",
   "Koina Village Preserve",
   "Sabi Community Woodlands",
@@ -41,9 +41,30 @@ const honoraryICCAs = [
 
 export function ICCAHonoraryMentions() {
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+const isGlass = false
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [selectedICCA, setSelectedICCA] = useState<HonoraryICCA | null>(null)
+  const [selectedICCA, setSelectedICCA] = useState<IccaWithDetails | null>(null)
+  const [iccas, setIccas] = useState<Icca[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isFetchingDetails, setIsFetchingDetails] = useState(false)
+
+  // Fetch ICCAs data on component mount
+  useEffect(() => {
+    const fetchIccas = async () => {
+      try {
+        setLoading(true)
+        const iccasData = await getIccas()
+        setIccas(iccasData)
+      } catch (err) {
+        console.error('Error fetching ICCAs:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchIccas()
+  }, [])
 
   // Split into 3 rows of 8 items each
   const rows = [
@@ -52,11 +73,22 @@ export function ICCAHonoraryMentions() {
     honoraryICCAs.slice(16, 24)
   ]
 
-  const handlePillClick = (name: string) => {
-    const icca = honoraryIccaDetails.find(i => i.name === name)
+  const handlePillClick = async (name: string) => {
+    const icca = iccas.find(i => i.name === name)
     if (icca) {
-      setSelectedICCA(icca)
-      setDrawerOpen(true)
+      try {
+        setIsFetchingDetails(true)
+        // Fetch full ICCA data with gallery
+        const fullIcca = await getIcca(icca.id)
+        if (fullIcca) {
+          setSelectedICCA(fullIcca)
+          setDrawerOpen(true)
+        }
+      } catch (err) {
+        console.error('Error fetching ICCA details:', err)
+      } finally {
+        setIsFetchingDetails(false)
+      }
     }
   }
 
@@ -92,8 +124,9 @@ export function ICCAHonoraryMentions() {
                           : "bg-card border-border text-foreground hover:bg-accent"
                         }
                         transition-colors duration-200
+                        ${isFetchingDetails ? "opacity-50 cursor-wait" : ""}
                       `}
-                      onClick={() => handlePillClick(name)}
+                      onClick={() => !isFetchingDetails && handlePillClick(name)}
                     >
                       {name}
                     </div>
@@ -109,8 +142,9 @@ export function ICCAHonoraryMentions() {
                           : "bg-card border-border text-foreground hover:bg-accent"
                         }
                         transition-colors duration-200
+                        ${isFetchingDetails ? "opacity-50 cursor-wait" : ""}
                       `}
-                      onClick={() => handlePillClick(name)}
+                      onClick={() => !isFetchingDetails && handlePillClick(name)}
                     >
                       {name}
                     </div>

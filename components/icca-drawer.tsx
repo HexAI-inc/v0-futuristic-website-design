@@ -5,14 +5,16 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, Dr
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { X, MapPin } from "lucide-react"
+import { X, MapPin, Loader2, ExternalLink } from "lucide-react"
 import Image from "next/image"
-import { HonoraryICCA } from "@/lib/icca-data"
+import { getIcca, type IccaWithDetails } from "@/lib/database"
+import Link from "next/link"
+import { ResourceActions } from "@/components/resource-actions"
 
 interface ICCADrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  selectedICCA: HonoraryICCA | null
+  selectedICCA: IccaWithDetails | null
 }
 
 export function ICCADrawer({ open, onOpenChange, selectedICCA }: ICCADrawerProps) {
@@ -71,7 +73,7 @@ export function ICCADrawer({ open, onOpenChange, selectedICCA }: ICCADrawerProps
       {isMobile ? (
         // Bottom drawer on mobile
         <Drawer open={open} onOpenChange={handleDrawerChange}>
-          <DrawerContent className="h-[90vh] max-h-[90vh] flex flex-col">
+          <DrawerContent className="flex flex-col">
             <DrawerHeader>
               <Badge className="w-fit mb-2 bg-primary">
                 Honorary ICCA
@@ -101,34 +103,53 @@ export function ICCADrawer({ open, onOpenChange, selectedICCA }: ICCADrawerProps
               </div>
 
               {/* Image Carousel */}
-              <div>
-                <h4 className="font-semibold mb-3">Gallery</h4>
-                <div className="relative">
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <Image
-                      src={selectedICCA.gallery[currentImageIndex].src}
-                      alt={selectedICCA.gallery[currentImageIndex].alt}
-                      fill
-                      className="object-cover cursor-pointer"
-                      onClick={() => openModal(selectedICCA.gallery[currentImageIndex].src)}
-                    />
-                  </div>
-
-                  {/* Dots */}
-                  {selectedICCA.gallery.length > 1 && (
-                    <div className="flex justify-center gap-1 mt-2">
-                      {selectedICCA.gallery.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-all ${
-                            index === currentImageIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
+              {selectedICCA.gallery && selectedICCA.gallery.length > 0 ? (
+                <div>
+                  <h4 className="font-semibold mb-3">Gallery</h4>
+                  <div className="relative">
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <Image
+                        src={selectedICCA.gallery[currentImageIndex].src}
+                        alt={selectedICCA.gallery[currentImageIndex].alt}
+                        fill
+                        className="object-cover cursor-pointer"
+                        onClick={() => openModal(selectedICCA.gallery[currentImageIndex].src)}
+                      />
                     </div>
-                  )}
+
+                    {/* Dots */}
+                    {selectedICCA.gallery.length > 1 && (
+                      <div className="flex justify-center gap-1 mt-2">
+                        {selectedICCA.gallery.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentImageIndex(index)}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              index === currentImageIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
+              ) : (
+                <div>
+                  <h4 className="font-semibold mb-3">Gallery</h4>
+                  <div className="aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                    <p className="text-muted-foreground">No images available</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 space-y-3">
+                <ResourceActions resourceId={selectedICCA.id} resourceName={selectedICCA.name} resourceType="icca" />
+                <Link href={`/iccas/${selectedICCA.id}`} onClick={() => onOpenChange(false)}>
+                  <Button variant="ghost" className="w-full gap-2">
+                    View Full Details
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
 
@@ -174,34 +195,53 @@ export function ICCADrawer({ open, onOpenChange, selectedICCA }: ICCADrawerProps
               </div>
 
               {/* Image Carousel */}
-              <div>
-                <h4 className="font-semibold mb-3">Gallery</h4>
-                <div className="relative">
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <Image
-                      src={selectedICCA.gallery[currentImageIndex].src}
-                      alt={selectedICCA.gallery[currentImageIndex].alt}
-                      fill
-                      className="object-cover cursor-pointer"
-                      onClick={() => openModal(selectedICCA.gallery[currentImageIndex].src)}
-                    />
-                  </div>
-
-                  {/* Dots */}
-                  {selectedICCA.gallery.length > 1 && (
-                    <div className="flex justify-center gap-1 mt-2">
-                      {selectedICCA.gallery.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-all ${
-                            index === currentImageIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
+              {selectedICCA.gallery && selectedICCA.gallery.length > 0 ? (
+                <div>
+                  <h4 className="font-semibold mb-3">Gallery</h4>
+                  <div className="relative">
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <Image
+                        src={selectedICCA.gallery[currentImageIndex].src}
+                        alt={selectedICCA.gallery[currentImageIndex].alt}
+                        fill
+                        className="object-cover cursor-pointer"
+                        onClick={() => openModal(selectedICCA.gallery[currentImageIndex].src)}
+                      />
                     </div>
-                  )}
+
+                    {/* Dots */}
+                    {selectedICCA.gallery.length > 1 && (
+                      <div className="flex justify-center gap-1 mt-2">
+                        {selectedICCA.gallery.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentImageIndex(index)}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              index === currentImageIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
+              ) : (
+                <div>
+                  <h4 className="font-semibold mb-3">Gallery</h4>
+                  <div className="aspect-video rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                    <p className="text-muted-foreground">No images available</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="pt-4 space-y-3">
+                <ResourceActions resourceId={selectedICCA.id} resourceName={selectedICCA.name} resourceType="icca" />
+                <Link href={`/iccas/${selectedICCA.id}`} onClick={() => onOpenChange(false)}>
+                  <Button variant="ghost" className="w-full gap-2">
+                    View Full Details
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
 

@@ -3,7 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 
-export type Theme = "midnight-jungle" | "savanna-gold" | "riverine-blue" | "forest-canopy" | "glass-morphism"
+export type Theme = "midnight-jungle"
 
 interface ThemeContextType {
   theme: Theme
@@ -18,20 +18,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true)
-    const savedTheme = localStorage.getItem("gambia-theme") as Theme
-    if (savedTheme) {
-      setTheme(savedTheme)
-    }
+    // Always set to midnight-jungle theme
+    document.documentElement.setAttribute("data-theme", "midnight-jungle")
   }, [])
 
-  useEffect(() => {
-    if (mounted) {
-      localStorage.setItem("gambia-theme", theme)
-      document.documentElement.setAttribute("data-theme", theme)
-    }
-  }, [theme, mounted])
+  // Prevent theme changes - always keep midnight-jungle
+  const handleSetTheme = (newTheme: Theme) => {
+    // Do nothing - theme is fixed
+  }
 
-  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>
+  return <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {

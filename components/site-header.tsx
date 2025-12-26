@@ -3,20 +3,22 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Trees, Users, Globe, Home, Mail } from "lucide-react"
+import { Menu, X, Trees, Users, Globe, Home, Mail, BookOpen, Info } from "lucide-react"
 import { useTheme } from "@/lib/theme-context"
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+const isGlass = false
 
   const navigation = [
     { name: "Home", href: "/", icon: Home },
     { name: "National Parks", href: "/parks", icon: Trees },
     { name: "ICCAs", href: "/iccas", icon: Users },
     { name: "Biosphere", href: "/biosphere", icon: Globe },
-    { name: "Contact", href: "/contact", icon: Mail },
+    { name: "Resources", href: "/resources", icon: BookOpen },
+    { name: "About", href: "/about", icon: Info },
   ]
 
   return (

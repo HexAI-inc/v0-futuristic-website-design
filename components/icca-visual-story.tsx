@@ -35,7 +35,8 @@ const stories = [
 export function ICCAVisualStory() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+const isGlass = false
 
   return (
     <section className={`py-24 ${isGlass ? "glass-section" : "bg-muted/30"}`}>

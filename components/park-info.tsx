@@ -2,12 +2,14 @@
 
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { Park } from "@/lib/parks-data"
+import type { Park } from "@/lib/database"
 import { useTheme } from "@/lib/theme-context"
+import { ResourceActions } from "@/components/resource-actions"
 
 export function ParkInfo({ park }: { park: Park }) {
   const { theme } = useTheme()
-  const isGlass = theme === "glass-morphism"
+  // Theme is fixed to midnight-jungle, so glass-morphism styling is never applied
+const isGlass = false
 
   return (
     <section className="py-24 px-4">
@@ -71,7 +73,11 @@ export function ParkInfo({ park }: { park: Park }) {
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 <span className="text-primary">🌤️</span> Best Time to Visit
               </h3>
-              <p className="text-lg leading-relaxed">{park.bestTime}</p>
+              <p className="text-lg leading-relaxed mb-8">{park.best_time}</p>
+              
+              <div className="pt-6 border-t border-border">
+                <ResourceActions resourceId={park.id} resourceName={park.name} resourceType="park" />
+              </div>
             </Card>
           </div>
         </div>
