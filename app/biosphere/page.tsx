@@ -118,20 +118,6 @@ export default async function BiospherePage() {
     )
   }
 
-export default async function BiospherePage() {
-  const biosphere = await getBiosphereData()
-
-  if (!biosphere) {
-    return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Biosphere Reserve Not Found</h1>
-          <p className="text-muted-foreground">The biosphere reserve data could not be loaded.</p>
-        </div>
-      </main>
-    )
-  }
-
   return (
     <main className="min-h-screen">
       <BiosphereHero biosphere={biosphere} />
